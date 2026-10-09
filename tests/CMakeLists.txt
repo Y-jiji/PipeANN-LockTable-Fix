@@ -34,7 +34,3 @@ target_link_libraries(build_disk_index_filtered ${PROJECT_NAME})
 
 add_executable(search_disk_index_filtered search_disk_index_filtered.cpp)
 target_link_libraries(search_disk_index_filtered ${PROJECT_NAME})
-
-find_package(Threads REQUIRED)
-add_executable(test_sparse_lock_table test_sparse_lock_table.cpp)
-target_link_libraries(test_sparse_lock_table PRIVATE Threads::Threads)
