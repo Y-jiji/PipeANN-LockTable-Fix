@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <omp.h>
 #include <shared_mutex>
-#include <system_error>
 #include "utils/arch_compat.h"
 #include "utils/libcuckoo/cuckoohash_map.hh"
 #include "utils/log.h"
@@ -105,19 +104,7 @@ namespace pipeann {
       });
 
       // Never block under the bucket lock: unlock() needs that same bucket.
-      int ret = write ? pthread_rwlock_wrlock(rwlock) : pthread_rwlock_rdlock(rwlock);
-      if (ret != 0) {
-        // Acquisition failed: drop only our reference, without unlocking another holder.
-        locks_->erase_fn(key, [&](std::pair<pthread_rwlock_t *, int> &v) {
-          if (--v.second == 0) {
-            pthread_rwlock_destroy(v.first);
-            delete v.first;
-            return true;
-          }
-          return false;
-        });
-        throw std::system_error(ret, std::generic_category(), "SparseLockTable: lock failed");
-      }
+      write ? pthread_rwlock_wrlock(rwlock) : pthread_rwlock_rdlock(rwlock);
     }
 
     // The count includes both holders and blocking waiters; all updates are protected by the map.
